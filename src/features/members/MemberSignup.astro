@@ -42,6 +42,77 @@ const { heading, description, buttonText, footerText } = Astro.props
       <p class="text-xs font-bold text-white/60 mt-5">
         {footerText}
       </p>
+
+      <!-- Low-friction fallback: capture the email even if they're not ready to join -->
+      <div class="mt-12 pt-8 border-t border-white/10 max-w-md">
+        <p class="text-sm font-black uppercase tracking-wide text-white/80 mb-3">
+          Not ready to join? Get election updates instead.
+        </p>
+        <form id="member-signup-newsletter-form" class="flex flex-col sm:flex-row gap-2">
+          <label class="sr-only" for="member-signup-email">Email address</label>
+          <input
+            id="member-signup-email"
+            type="email"
+            required
+            placeholder="Enter your email"
+            class="flex-1 px-3 py-2.5 text-sm rounded-sm border border-white/15 bg-surface-raised text-white placeholder-white/30 focus:outline-none focus:border-magenta transition-colors"
+          />
+          <button
+            type="submit"
+            class="px-4 py-2.5 bg-white/10 text-white rounded-sm text-sm font-black uppercase hover:bg-white/20 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Keep Me Posted
+          </button>
+        </form>
+        <div id="member-signup-newsletter-message" class="hidden text-xs font-medium mt-2"></div>
+      </div>
     </div>
   </div>
 </section>
+
+<script>
+  // Mirrors the footer newsletter form — submits to NationBuilder via /api/newsletter
+  const form = document.getElementById('member-signup-newsletter-form') as HTMLFormElement | null
+  const message = document.getElementById('member-signup-newsletter-message')
+
+  if (form && message) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const input = form.querySelector('input[type="email"]') as HTMLInputElement | null
+      const button = form.querySelector('button[type="submit"]') as HTMLButtonElement | null
+      if (!input) return
+
+      const email = input.value
+      if (button) button.disabled = true
+      message.classList.add('hidden')
+
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+
+        if (res.ok) {
+          message.textContent = `Success — ${email} added to alerts.`
+          message.classList.remove('text-magenta')
+          message.classList.add('text-mint')
+          message.classList.remove('hidden')
+          form.classList.add('hidden')
+        } else {
+          message.textContent = "Couldn't subscribe right now — please try again shortly."
+          message.classList.remove('text-mint')
+          message.classList.add('text-magenta')
+          message.classList.remove('hidden')
+        }
+      } catch {
+        message.textContent = "Couldn't subscribe right now — please try again shortly."
+        message.classList.remove('text-mint')
+        message.classList.add('text-magenta')
+        message.classList.remove('hidden')
+      } finally {
+        if (button) button.disabled = false
+      }
+    })
+  }
+</script>

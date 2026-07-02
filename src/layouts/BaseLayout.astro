@@ -9,17 +9,40 @@ import { BrutalCard } from '@/components/ui'
 interface Props {
   title: string
   description?: string
+  /** Root-relative or absolute URL of the social share image. */
+  ogImage?: string
+  ogType?: 'website' | 'article'
 }
 
 const {
   title: rawTitle,
   description: rawDescription = 'Fusion Party Victoria - Taking back what they stole.',
+  ogImage = '/color_panel_rally.jpg',
+  ogType = 'website',
 } = Astro.props
 
 // Sanity stega-encodes editable strings with invisible characters; strip them
 // before they land in <title>/<meta> where they'd otherwise leak into the DOM.
 const title = stegaClean(rawTitle)
 const description = stegaClean(rawDescription)
+
+// Absolute URLs for social scrapers, derived from the request (no hardcoded domain).
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).href
+const ogImageUrl = new URL(ogImage, Astro.url.origin).href
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'PoliticalParty',
+  name: 'Fusion Party Victoria',
+  url: Astro.url.origin,
+  logo: new URL('/logo-rings-color.png', Astro.url.origin).href,
+  email: 'hello@fusionparty.org.au',
+  parentOrganization: {
+    '@type': 'PoliticalParty',
+    name: 'Fusion Party',
+    url: 'https://www.fusionparty.org.au',
+  },
+}
 
 const siteConfig = await getSiteConfig()
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true'
@@ -32,6 +55,23 @@ const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLE
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph / social share cards -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Fusion Party Victoria" />
+    <meta property="og:locale" content="en_AU" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />

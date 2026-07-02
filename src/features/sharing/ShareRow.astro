@@ -1,0 +1,134 @@
+---
+/**
+ * ShareRow - one-click share block for pushing a page into social feeds.
+ *
+ * Every link carries UTM parameters so the party can attribute traffic
+ * back to the channel that produced it.
+ *
+ * @param {string} title - Headline used in the share text
+ * @param {string} text - Longer share text (falls back to title)
+ * @param {string} campaign - utm_campaign value, e.g. 'policy-share'
+ * @param {string} heading - Block heading shown above the buttons
+ * @param {string} subheading - Supporting line under the heading
+ */
+import { Icon } from 'astro-icon/components'
+import { stegaClean } from '@sanity/client/stega'
+
+interface Props {
+  title: string
+  text?: string
+  campaign: string
+  heading?: string
+  subheading?: string
+}
+
+const {
+  title: rawTitle,
+  text: rawText,
+  campaign,
+  heading = 'Push this into the feed',
+  subheading,
+} = Astro.props
+
+const title = stegaClean(rawTitle)
+const text = stegaClean(rawText || rawTitle)
+
+const pageUrl = new URL(Astro.url.pathname, Astro.url.origin)
+
+const urlFor = (source: string, medium: string) => {
+  const u = new URL(pageUrl.href)
+  u.searchParams.set('utm_source', source)
+  u.searchParams.set('utm_medium', medium)
+  u.searchParams.set('utm_campaign', campaign)
+  return u.href
+}
+
+const channels = [
+  {
+    label: 'X',
+    icon: 'mdi:twitter',
+    ariaLabel: 'Share on X',
+    href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(urlFor('twitter', 'social'))}`,
+  },
+  {
+    label: 'Facebook',
+    icon: 'mdi:facebook',
+    ariaLabel: 'Share on Facebook',
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlFor('facebook', 'social'))}`,
+  },
+  {
+    label: 'WhatsApp',
+    icon: 'mdi:whatsapp',
+    ariaLabel: 'Share on WhatsApp',
+    href: `https://wa.me/?text=${encodeURIComponent(`${text} ${urlFor('whatsapp', 'messaging')}`)}`,
+  },
+  {
+    label: 'LinkedIn',
+    icon: 'mdi:linkedin',
+    ariaLabel: 'Share on LinkedIn',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(urlFor('linkedin', 'social'))}`,
+  },
+  {
+    label: 'Email',
+    icon: 'mdi:email',
+    ariaLabel: 'Share by email',
+    href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${text}\n\n${urlFor('email', 'email')}`)}`,
+  },
+]
+
+const copyUrl = urlFor('copy-link', 'referral')
+---
+
+<div class="share-row border border-white/10 rounded-sm p-6 bg-black/30">
+  <h3 class="text-xl font-display font-black uppercase text-white mb-1">{heading}</h3>
+  {subheading && <p class="text-sm font-bold text-white/60 mb-4">{subheading}</p>}
+  {!subheading && <div class="mb-4" />}
+
+  <div class="flex flex-wrap gap-2">
+    {
+      channels.map((channel) => (
+        <a
+          href={channel.href}
+          target={channel.href.startsWith('mailto:') ? undefined : '_blank'}
+          rel={channel.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+          aria-label={channel.ariaLabel}
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-black uppercase tracking-wide rounded-sm bg-black text-white border border-white/20 hover:bg-white/10 transition-colors"
+          style="font-family: 'Barlow Condensed', sans-serif;"
+        >
+          <Icon name={channel.icon} class="w-4 h-4" />
+          {channel.label}
+        </a>
+      ))
+    }
+    <button
+      type="button"
+      data-copy-link={copyUrl}
+      aria-label="Copy link"
+      class="copy-link-btn inline-flex items-center gap-2 px-4 py-2 text-sm font-black uppercase tracking-wide rounded-sm bg-magenta text-white hover:bg-magenta-bright transition-colors cursor-pointer"
+      style="font-family: 'Barlow Condensed', sans-serif;"
+    >
+      <Icon name="mdi:link-variant" class="w-4 h-4" />
+      <span class="copy-link-label">Copy Link</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.copy-link-btn').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const url = button.dataset.copyLink
+      const label = button.querySelector('.copy-link-label')
+      if (!url || !label) return
+      try {
+        await navigator.clipboard.writeText(url)
+        const original = label.textContent
+        label.textContent = 'Copied!'
+        setTimeout(() => {
+          label.textContent = original
+        }, 2000)
+      } catch {
+        label.textContent = url
+      }
+    })
+  })
+</script>
