@@ -36,7 +36,7 @@ const defaultTemplates: MessageTemplate[] = [
 
 I know you've been worried about me and my friends ever being able to afford a home. I wanted to share something that actually gives me hope.
 
-I've been looking into Reignite Democracy, and they're the first political party I've seen with housing policies that would actually help our generation without hurting yours.
+I've been looking into the Fusion Party, and they're the first political party I've seen with housing policies that would actually help our generation without hurting yours.
 
 Here's what caught my attention:
 
@@ -45,9 +45,9 @@ Here's what caught my attention:
 • They support renters' rights without attacking landlords who are doing the right thing
 • Their plans would make housing more affordable without crashing the market
 
-Unlike Labor and Liberal who've failed for decades, Reignite Democracy is running independent candidates who aren't beholden to property developer donations or the real estate lobby.
+Unlike Labor and Liberal who've failed for decades, the Fusion Party is running candidates who aren't beholden to property developer donations or the real estate lobby.
 
-I'm not asking you to change your whole political outlook - just to check out their housing policy: https://fusionparty.org.au/policies/housing
+I'm not asking you to change your whole political outlook - just to check out their housing policy: https://fusionparty.org.au/policies/housing?utm_source=friend-share&utm_medium=email&utm_campaign=convince-your-friends
 
 Would love to hear what you think. Maybe we could talk about it over dinner?
 
@@ -66,7 +66,7 @@ P.S. They're also serious about climate action and fixing our broken political s
     color: 'mint',
     body: `Anyone else sick of spending 2+ hours commuting and paying $200+ a month for the privilege? 🚆😤
 
-Just discovered Reignite Democracy wants to make public transport actually WORK:
+Just discovered the Fusion Party wants to make public transport actually WORK:
 - Free trams/buses in metro areas
 - High-speed rail connecting cities
 - Metro expansion that's not 20 years away
@@ -90,7 +90,7 @@ Check it out: fusionparty.org.au/policies/transport
     color: 'yellow',
     body: `Hey! I know you've been feeling hopeless about climate stuff lately. Same tbh.
 
-But I found something that actually made me feel less doomed: Reignite Democracy
+But I found something that actually made me feel less doomed: the Fusion Party
 
 They're not like the Greens (unrealistic timelines) or Labor (too slow). They've got actual plans:
 
@@ -115,7 +115,7 @@ Want to check it out together? ☕`,
     channel: 'linkedin',
     icon: 'mdi:briefcase-account',
     color: 'magenta',
-    body: `🗳️ Why I'm Taking a Serious Look at Reignite Democracy
+    body: `🗳️ Why I'm Taking a Serious Look at the Fusion Party
 
 As someone who works in [industry], I've watched both major parties fail to deliver meaningful reform for decades.
 
@@ -128,7 +128,7 @@ I'm pragmatic, not ideological. So when I found a political movement with:
 
 ...I paid attention.
 
-Reignite Democracy isn't left or right - they're forward. Their policies on:
+Fusion isn't left or right - they're forward. Their policies on:
 
 • Housing supply (economics 101, finally)
 • Public transport (infrastructure investment)
@@ -141,7 +141,7 @@ I'm not suggesting we all agree on everything. But I am suggesting we demand bet
 
 Australia deserves a government that treats us like adults.
 
-Check their policies: fusionparty.org.au
+Check their policies: fusionparty.org.au/policies?utm_source=friend-share&utm_medium=linkedin&utm_campaign=convince-your-friends
 
 Curious what others think - especially those in [policy/economics/infrastructure].
 
@@ -172,7 +172,7 @@ Is this... hope? In 2025??
 
 Not saying they're perfect but they're running in [YOUR ELECTORATE] and honestly anything is better than LibLab at this point
 
-Link in bio or google Reignite Democracy
+Link in bio or search Fusion Party
 
 #NotAnAd #JustTiredOfThis #AusPol #FusionParty #VoteIndependent
 
@@ -197,7 +197,7 @@ I'm not usually political, but I'm genuinely worried about what kind of world we
 
 The major parties have had decades to fix these things. They haven't.
 
-I've been looking into Reignite Democracy (independent candidates, not Labor/Liberal/Greens) and their policies actually address these concerns:
+I've been looking into the Fusion Party (not Labor/Liberal/Greens) and their policies actually address these concerns:
 
 📚 Fully funded public education
 🏠 Housing our kids can afford
@@ -208,7 +208,7 @@ I've been looking into Reignite Democracy (independent candidates, not Labor/Lib
 I'm done voting for "least worst." Our kids deserve better than that.
 
 Not asking anyone to agree with everything - just asking you to LOOK:
-fusionparty.org.au
+fusionparty.org.au/policies?utm_source=friend-share&utm_medium=facebook&utm_campaign=convince-your-friends
 
 What do other parents think? Are we all just accepting this is as good as it gets?
 
@@ -628,13 +628,7 @@ const contrastSection = pageData?.contrastSection || defaultContrastSection
           <h3 class="text-2xl font-display font-black uppercase mb-4 text-white">
             Quick Feedback Form
           </h3>
-          <form
-            action="https://formspree.io/f/YOUR_FORM_ID"
-            method="POST"
-            class="max-w-xl mx-auto space-y-4"
-          >
-            <!-- TODO: Replace YOUR_FORM_ID with actual Formspree ID or use your own form endpoint -->
-            <input type="hidden" name="_subject" value="Convince Your Friends - Feedback" />
+          <form id="feedback-form" class="max-w-xl mx-auto space-y-4">
             <div class="text-left">
               <label class="block text-white font-black uppercase text-sm mb-2">
                 Which template did you use?
@@ -855,7 +849,7 @@ const contrastSection = pageData?.contrastSection || defaultContrastSection
   <Footer />
 </BaseLayout>
 
-<script is:inline>
+<script>
   // Template expand/collapse functionality
   document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.template-card')
@@ -931,6 +925,22 @@ const contrastSection = pageData?.contrastSection || defaultContrastSection
           })
         }
       })
+    })
+
+    // Feedback form — composes an email instead of posting to a dead endpoint
+    const feedbackForm = document.getElementById('feedback-form') as HTMLFormElement | null
+    feedbackForm?.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const data = new FormData(feedbackForm)
+      const body = [
+        `Template: ${data.get('template') || ''}`,
+        `Result: ${data.get('result') || ''}`,
+        `Feedback: ${data.get('feedback') || ''}`,
+        `OK to share as testimonial: ${data.get('can_share') ? 'yes' : 'no'}`,
+      ].join('\n')
+      window.location.href = `mailto:hello@fusionparty.org.au?subject=${encodeURIComponent(
+        'Convince Your Friends - Feedback'
+      )}&body=${encodeURIComponent(body)}`
     })
   })
 </script>

@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Sidebar } from '@/features/page-rendering'
+import { ShareRow } from '@/features/sharing'
 import { Icon } from 'astro-icon/components'
 import { BrutalCard, BrutalButton, BrutalBadge } from '@/components/ui'
 import { getDocumentBySlug } from '../../lib/sanity'
@@ -112,7 +113,11 @@ const sidebarSections = [
 ]
 ---
 
-<BaseLayout title={`${policy.title} | Reignite Democracy Policy`} description={policy.summary}>
+<BaseLayout
+  title={`${policy.title} | Reignite Democracy Policy`}
+  description={policy.summary}
+  ogType="article"
+>
   <Header />
 
   {/* ── HERO ── */}
@@ -307,8 +312,19 @@ const sidebarSections = [
         )
       }
 
+      {/* ── Share row ── */}
+      <div class="mt-10 border-t border-white/10 pt-8">
+        <ShareRow
+          title={policy.title}
+          text={`${policy.title} — ${policy.summary}`}
+          campaign="policy-share"
+          heading="Seen this issue in the news?"
+          subheading="Put the costed fix in front of your people while it's being talked about."
+        />
+      </div>
+
       {/* ── Back / CTA row ── */}
-      <div class="mt-10 flex flex-wrap gap-3 border-t border-white/10 pt-8">
+      <div class="mt-8 flex flex-wrap gap-3">
         <BrutalButton variant="black" href="/policies" icon="mdi:arrow-left">
           All Policies
         </BrutalButton>
